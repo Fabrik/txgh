@@ -7,6 +7,7 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'strava/l10n/github_repo'
 require 'strava/l10n/transifex_project'
+require 'logger'
 
 module L10n
 
@@ -37,6 +38,8 @@ module L10n
       register Sinatra::Reloader
     end
 
+    logger = Logger.new(STDOUT)
+
     def initialize(app)
       super(app)
     end
@@ -65,8 +68,11 @@ module L10n
       end
       # We only care about the master branch
       if hook_data[:ref] == 'refs/heads/master'
+logger.debug(hook_data)
         github_repo_name = "#{hook_data[:repository][:owner][:name]}/#{hook_data[:repository][:name]}"
+logger.debug(github_repo_name)
         github_repo = Strava::L10n::GitHubRepo.new(github_repo_name)
+logger.debug(github_repo)
         transifex_project = github_repo.transifex_project
 
         # Build an index of known Tx resources, by source file
@@ -101,7 +107,6 @@ module L10n
           end
         end
       end
-      201
     end
   end
 end
