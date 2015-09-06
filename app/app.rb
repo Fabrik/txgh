@@ -39,6 +39,7 @@ module L10n
     end
 
     logger = Logger.new(STDOUT)
+    logger.level = Logger::WARN
 
     def initialize(app)
       super(app)
@@ -52,46 +53,51 @@ module L10n
 
         # Do not update the source
         unless request['language'] == tx_resource.source_lang
+          github_name = transifex_project.github_repo.name
+          logger.debug(github_name)
+          github_branch = transifex_project.github_repo.config['branch']
+          logger.debug(github_branch)
           translation = transifex_project.api.download(tx_resource, request['language'])
           translation_path = tx_resource.translation_path(transifex_project.lang_map(request['language']))
+          logger.debug(translation_path)
           transifex_project.github_repo.api.commit(
-              transifex_project.github_repo.name, translation_path, translation)
+              github_repo_name, github_branch, translation_path, translation)
         end
       end
     end
 
     post '/github' do
-      if params[:payload] != nil 
-        hook_data = JSON.parse(params[:payload], symbolize_names: true)
-      else
-        hook_data = JSON.parse(request.body.read, symbolize_names: true)
-      end
-      # We only care about the master branch
-      if hook_data[:ref] == 'refs/heads/master'
-logger.debug(hook_data)
-        github_repo_name = "#{hook_data[:repository][:owner][:name]}/#{hook_data[:repository][:name]}"
-logger.debug(github_repo_name)
-        github_repo = Strava::L10n::GitHubRepo.new(github_repo_name)
-logger.debug(github_repo)
+      hook_data = JSON.parse(params[:payload], symbolize_names: true)
+      logger.debug(hook_data)
+      github_repo_name = "#{hook_data[:repository][:owner][:name]}/#{hook_data[:repository][:name]}"
+      github_repo = Strava::L10n::GitHubRepo.new(github_repo_name)
+      logger.debug(github_repo.config)
+      branch = github_repo.config['branch']
+      # Check if this is the branch we want
+      if hook_data[:ref] == "refs/heads/#{branch}"
         transifex_project = github_repo.transifex_project
 
         # Build an index of known Tx resources, by source file
         tx_resources = {}
         transifex_project.resources.each do |resource|
+          logger.debug(resource)
           tx_resources[resource.source_file] = resource
         end
 
-        puts tx_resources.inspect
+        # puts tx_resources.inspect
 
         # Find the updated resources and maps the most recent commit in which
         # each was modified
         updated_resources = {}
         hook_data[:commits].each do |commit|
+          logger.debug(commit)
           commit[:modified].each do |modified|
+            logger.debug(modified)
             updated_resources[tx_resources[modified]] = commit[:id] if tx_resources.include?(modified)
           end
         end
 
+        logger.debug(updated_resources)
         # For each modified resource, get its content and updates the content
         # in Transifex.
         updated_resources.each do |tx_resource, commit_sha|
@@ -107,6 +113,7 @@ logger.debug(github_repo)
           end
         end
       end
+      201
     end
   end
 end

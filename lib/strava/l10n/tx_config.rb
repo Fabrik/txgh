@@ -1,5 +1,6 @@
 require 'parseconfig'
 require 'strava/l10n/tx_resource'
+require 'logger'
 
 module Strava
   module L10n
@@ -23,7 +24,9 @@ module Strava
       def self.parse_lang_map(lang_map)
         lang_map.split(',').inject({}) do |result, m|
           key_value = m.split(':', 2)
-          result[key_value[0].strip] = key_value[1].strip
+          kvk = key_value[0].strip
+          kvv = key_value[1].strip
+          result[kvk] = kvv
           result
         end
       end
