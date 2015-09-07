@@ -63,3 +63,13 @@ type = <FILETYPE>
 
 ```
 
+Running as a service
+===
+
+There's probably a better way to do, but knowing nothing about Ruby or Bundler, all I did was add this:
+
+```
+# run txgh
+su - ec2-user -c 'cd /home/ec2-user/txgh && /home/ec2-user/bin/bundle exec racku
+p &'
+```
