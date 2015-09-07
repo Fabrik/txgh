@@ -5,6 +5,8 @@ require 'logger'
 module Strava
   module L10n
     class TxConfig
+
+
       def initialize(path)
         config = ParseConfig.new(path)
         @resources = []
@@ -22,10 +24,13 @@ module Strava
       end
 
       def self.parse_lang_map(lang_map)
+        logger = Logger.new(STDOUT)
+        logger.level = Logger::WARN
         lang_map.split(',').inject({}) do |result, m|
           key_value = m.split(':', 2)
           kvk = key_value[0].strip
           kvv = key_value[1].strip
+          logger.debug("Lang key: #{kvk}, value #{kvv}");
           result[kvk] = kvv
           result
         end
