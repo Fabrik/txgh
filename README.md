@@ -66,7 +66,7 @@ type = <FILETYPE>
 Running as a service
 ===
 
-There's probably a better way to do, but knowing nothing about Ruby or Bundler, all I did was add this:
+There's probably a better way to do, but knowing nothing about Ruby or Bundler, all I did was add this to /etc/rc.local
 
 ```
 # run txgh
