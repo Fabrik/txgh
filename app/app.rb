@@ -61,7 +61,7 @@ module L10n
           translation_path = tx_resource.translation_path(transifex_project.lang_map(request['language']))
           logger.debug(translation_path)
           transifex_project.github_repo.api.commit(
-              github_repo_name, github_branch, translation_path, translation)
+              github_name, github_branch, translation_path, translation)
         end
       end
     end
