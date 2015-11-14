@@ -55,7 +55,7 @@ module L10n
         unless request['language'] == tx_resource.source_lang
           github_name = transifex_project.github_repo.name
           logger.debug(github_name)
-          github_branch = transifex_project.github_repo.config['branch']
+          github_branch = transifex_project.github_repo.config.fetch('branch', 'master')
           logger.debug(github_branch)
           translation = transifex_project.api.download(tx_resource, request['language'])
           translation_path = tx_resource.translation_path(transifex_project.lang_map(request['language']))
